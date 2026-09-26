@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Inertia\Inertia;
+use Inertia\ExceptionResponse;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +29,16 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         Model::preventLazyLoading(! $this->app->isProduction());
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
+
+        Inertia::handleExceptionsUsing(function (ExceptionResponse $response) {
+            if (app()->environment('local')) {
+                return null;
+            }
+
+            if (in_array($response->statusCode(), [403, 404, 500, 503], true)) {
+                return $response->render('error', ['status' => $response->statusCode()])->withSharedData();
+            }
+        });
     }
 
     /**

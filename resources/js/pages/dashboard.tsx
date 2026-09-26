@@ -1,36 +1,50 @@
-import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import { dashboard } from '@/routes';
+import { Deferred, Head, Link } from '@inertiajs/react';
 
-export default function Dashboard() {
+import { StatusBadge } from '@/components/tasks/badges';
+import AppLayout from '@/layouts/app-layout';
+import { dashboard } from '@/routes';
+import tasks from '@/routes/tasks';
+import type { BreadcrumbItem } from '@/types';
+import type { TaskStatus } from '@/types/task';
+
+type Stats = { total: number; pending: number; in_progress: number; completed: number; high_priority: number };
+type Recent = { id: number; title: string; status: TaskStatus; due_date: string | null };
+
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: dashboard().url }];
+
+export default function Dashboard({ stats, recent }: { stats: Stats; recent?: Recent[] }) {
+    const cards: [string, number][] = [
+        ['Total tasks', stats.total],
+        ['Pending', stats.pending],
+        ['In progress', stats.in_progress],
+        ['Completed', stats.completed],
+        ['High priority', stats.high_priority],
+    ];
+
     return (
-        <>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
+            <div className="p-4">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+                    {cards.map(([label, value]) => (
+                        <div key={label} className="rounded-xl border p-4">
+                            <p className="text-sm text-gray-500">{label}</p>
+                            <p className="text-3xl font-bold">{value}</p>
+                        </div>
+                    ))}
                 </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                </div>
+                <h2 className="mt-8 text-lg font-semibold">Recent tasks</h2>
+                <Deferred data="recent" fallback={<p className="mt-2 text-gray-500">Loading...</p>}>
+                    <ul className="mt-2 divide-y">
+                        {recent?.map((t) => (
+                            <li key={t.id} className="flex items-center justify-between py-2">
+                                <Link href={tasks.show(t.id).url} className="hover:underline">{t.title}</Link>
+                                <StatusBadge status={t.status} />
+                            </li>
+                        ))}
+                    </ul>
+                </Deferred>
             </div>
-        </>
+        </AppLayout>
     );
 }
-
-Dashboard.layout = {
-    breadcrumbs: [
-        {
-            title: 'Dashboard',
-            href: dashboard(),
-        },
-    ],
-};
