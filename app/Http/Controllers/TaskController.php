@@ -45,7 +45,7 @@ class TaskController extends Controller
     {
         $task = $request->user()->tasks()->create($request->validated());
 
-        Inertia::flash(['success', 'Task created successfully.']);
+        Inertia::flash('success', 'Task created successfully.');
 
         return to_route('tasks.show', $task);
     }
@@ -74,7 +74,7 @@ class TaskController extends Controller
     {
         $task->update($request->validated());
 
-        Inertia::flash(['success', 'Task updated successfully.']);
+        Inertia::flash('success', 'Task updated successfully.');
 
         return to_route('tasks.show', $task);
     }
@@ -85,7 +85,7 @@ class TaskController extends Controller
 
         $task->delete();
 
-        Inertia::flash(['success', 'Task deleted.']);
+        Inertia::flash('success', 'Task deleted.');
 
         return to_route('tasks.index');
     }
